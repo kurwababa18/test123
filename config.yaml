@@ -6,12 +6,6 @@ cache_limit: 200
 cache_ttl_markets: 120  # 2 minutes
 cache_ttl_feeds: 1800   # 30 minutes
 
-# Optional: Polymarket API credentials for authenticated features
-# If not provided, the app will use read-only mode with general market data
-polymarket_api_key: null
-polymarket_api_secret: null
-polymarket_api_passphrase: null
-
 nitter:
   base_urls:
     - "https://nitter.net"

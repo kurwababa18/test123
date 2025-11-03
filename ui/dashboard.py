@@ -210,11 +210,15 @@ class PolymarketApp(App):
             status = self.query_one("#status_bar", StatusBar)
             status.status_text = "🔄 Loading your positions..."
 
+            logger.info(f"Fetching positions for wallet: {self.config.wallet_address}")
+
             # Fetch positions from wallet
             positions = await asyncio.to_thread(
                 self.polymarket.get_wallet_positions,
                 self.config.wallet_address
             )
+
+            logger.info(f"Received positions: {type(positions)}, length: {len(positions) if positions else 0}")
 
             if not positions:
                 logger.warning("No positions found")
@@ -226,6 +230,10 @@ class PolymarketApp(App):
 
             self.positions = positions
             logger.info(f"Found {len(positions)} positions")
+
+            # Log first position for debugging
+            if positions:
+                logger.info(f"First position: {positions[0].get('slug', 'NO_SLUG')}")
 
             # Sync positions with config (auto-generate keywords)
             await asyncio.to_thread(

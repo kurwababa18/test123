@@ -70,7 +70,9 @@ class Config:
     @property
     def markets(self) -> List[Dict[str, Any]]:
         """Get list of markets configuration."""
-        return self._data.get('markets', [])
+        markets = self._data.get('markets', [])
+        # Ensure we always return a list, even if config has None
+        return markets if markets is not None else []
 
     def get_market_keywords(self, slug: str) -> List[str]:
         """
@@ -137,6 +139,10 @@ class Config:
             position_data: List of position dictionaries from API
             keyword_extractor: Function to extract keywords from titles
         """
+        # Handle None or empty position data
+        if not position_data:
+            return
+
         existing_slugs = {m.get('slug') for m in self.markets}
 
         for position in position_data:
@@ -153,6 +159,8 @@ class Config:
             # Auto-generate keywords
             keywords = []
             if keyword_extractor and callable(keyword_extractor):
-                keywords = keyword_extractor(title)
+                extracted = keyword_extractor(title)
+                # Ensure we got a list back
+                keywords = extracted if extracted is not None else []
 
             self.add_market(slug, title, keywords)

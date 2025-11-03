@@ -203,7 +203,7 @@ class PolymarketApp(App):
 
         logger.info("Application started - information aggregation mode")
 
-    @work(exclusive=True)
+    @work(exclusive=True, thread=True)
     async def initialize_tabs(self):
         """Fetch wallet positions and create tabs dynamically."""
         try:
@@ -274,7 +274,7 @@ class PolymarketApp(App):
             status = self.query_one("#status_bar", StatusBar)
             status.status_text = f"❌ Error: {str(e)[:50]}"
 
-    @work(exclusive=True)
+    @work(exclusive=True, thread=True)
     async def refresh_data(self):
         """Refresh information aggregation for all markets."""
         try:

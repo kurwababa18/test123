@@ -120,12 +120,7 @@ class PolymarketApp(App):
         self.title = "Polymarket Terminal"
         self.config = Config()
         self.cache = Cache(max_entries=self.config.cache_limit)
-        self.polymarket = PolymarketClient(
-            self.cache,
-            api_key=self.config.polymarket_api_key,
-            api_secret=self.config.polymarket_api_secret,
-            api_passphrase=self.config.polymarket_api_passphrase
-        )
+        self.polymarket = PolymarketClient(self.cache)
         self.feeds = FeedSource(self.cache, self.config.nitter_urls)
         
         self.current_tab_idx = 0

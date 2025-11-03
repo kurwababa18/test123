@@ -19,6 +19,31 @@ nitter:
     - "https://nitter.poast.org"
   fallback_on_error: true
 
+# Keyword buckets - add custom searches for each market you care about
+# The app will auto-generate buckets from your positions, but you can customize them here
+# Format:
+#   market_slug: "will-trump-win-2024"
+#   keywords:
+#     - "keyword OR phrase"
+#     - "another keyword"
+
+# Example custom buckets (will be auto-generated from your positions):
+custom_keyword_buckets:
+  # Example: if you have a position on "Will there be a US-Venezuela conflict?"
+  # venezuela_conflict:
+  #   keywords:
+  #     - "Venezuela AND Pentagon"
+  #     - "Trump AND Maduro"
+  #     - "Nicolás Maduro OR Maduro"
+
+  # Example: if you have a position on "Government shutdown"
+  # government_shutdown:
+  #   keywords:
+  #     - "government shutdown"
+  #     - "continuing resolution"
+  #     - "CR vote"
+
+# Legacy topics (for fallback if no positions found)
 topics:
   - key: "venezuela_conflict"
     title: "US–Venezuela"
@@ -29,14 +54,11 @@ topics:
       - "Trump AND Maduro"
       - "Nicolás Maduro OR Maduro"
       - "Caracas AND (troops OR military OR strike)"
-      - "Venezuela AND (incursion OR border OR use of force)"
-  
+
   - key: "gov_shutdown"
     title: "Government Shutdown"
     markets: []
     keywords:
       - "government shutdown"
       - "continuing resolution OR CR vote"
-      - "House Rules Committee AND (CR OR spending)"
       - "Schumer AND (shutdown OR CR)"
-      - "OMB OR CBO AND (score OR estimate)"

@@ -2704,3 +2704,103 @@
 2025-11-02 19:42:18 - httpx - INFO - HTTP Request: GET http://ww84.nitter.it/search/rss?q=OMB+OR+CBO+AND+%28score+OR+estimate%29 "HTTP/1.1 200 OK"
 2025-11-02 19:42:18 - core.sources - INFO - Fetched 0 tweets for query
 2025-11-02 19:42:18 - ui.dashboard - INFO - Data refresh complete: 20 markets
+2025-11-02 20:39:59 - ui.dashboard - INFO - Application started
+2025-11-02 20:40:00 - core.polymarket - INFO - Fetching positions for wallet 0x165Ab234...
+2025-11-02 20:40:00 - httpx - INFO - HTTP Request: GET https://gamma-api.polymarket.com/markets?wallet=0x165Ab23404f12a077c45426a36EDCE442347B477 "HTTP/1.1 200 OK"
+2025-11-02 20:40:00 - core.polymarket - INFO - Fetched 20 markets
+2025-11-02 20:40:00 - core.sources - INFO - Fetching Nitter search: Venezuela AND Pentagon...
+2025-11-02 20:40:00 - httpx - INFO - HTTP Request: GET https://nitter.net/search/rss?q=Venezuela+AND+Pentagon "HTTP/1.1 200 OK"
+2025-11-02 20:40:00 - core.sources - INFO - Fetched 0 tweets for query
+2025-11-02 20:40:00 - core.sources - INFO - Fetching Google News: Venezuela AND Pentagon...
+2025-11-02 20:40:01 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=Venezuela+AND+Pentagon&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:40:01 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:40:01 - core.sources - INFO - Fetching Nitter search: Venezuela AND Southern Command...
+2025-11-02 20:40:01 - httpx - INFO - HTTP Request: GET https://nitter.net/search/rss?q=Venezuela+AND+Southern+Command "HTTP/1.1 200 OK"
+2025-11-02 20:40:01 - core.sources - INFO - Fetched 0 tweets for query
+2025-11-02 20:40:01 - core.sources - INFO - Fetching Google News: Venezuela AND Southern Command...
+2025-11-02 20:40:01 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=Venezuela+AND+Southern+Command&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:40:01 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:40:01 - core.sources - INFO - Fetching Nitter search: Trump AND Maduro...
+2025-11-02 20:40:02 - httpx - INFO - HTTP Request: GET https://nitter.net/search/rss?q=Trump+AND+Maduro "HTTP/1.1 429 Too Many Requests"
+2025-11-02 20:40:02 - core.sources - WARNING - Rate limited nitter for 300s
+2025-11-02 20:40:02 - core.sources - INFO - Rotated to Nitter: https://nitter.it
+2025-11-02 20:40:02 - core.sources - INFO - Fetching Nitter search: Trump AND Maduro...
+2025-11-02 20:40:02 - httpx - INFO - HTTP Request: GET https://nitter.it/search/rss?q=Trump+AND+Maduro "HTTP/1.1 302 Found"
+2025-11-02 20:40:02 - httpx - INFO - HTTP Request: GET http://ww84.nitter.it/search/rss?q=Trump+AND+Maduro "HTTP/1.1 200 OK"
+2025-11-02 20:40:02 - core.sources - INFO - Fetched 0 tweets for query
+2025-11-02 20:40:02 - core.sources - INFO - Fetching Google News: Trump AND Maduro...
+2025-11-02 20:40:03 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=Trump+AND+Maduro&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:40:03 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:40:03 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:40:03 - core.sources - INFO - Fetching Google News: Nicolás Maduro OR Maduro...
+2025-11-02 20:40:03 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=Nicol%C3%A1s+Maduro+OR+Maduro&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:40:03 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:40:03 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:40:03 - core.sources - INFO - Fetching Google News: Caracas AND (troops OR military OR strike)...
+2025-11-02 20:40:04 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=Caracas+AND+%28troops+OR+military+OR+strike%29&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:40:04 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:40:04 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:40:04 - core.sources - INFO - Fetching Google News: government shutdown...
+2025-11-02 20:40:04 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=government+shutdown&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:40:04 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:40:04 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:40:04 - core.sources - INFO - Fetching Google News: continuing resolution OR CR vote...
+2025-11-02 20:40:05 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=continuing+resolution+OR+CR+vote&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:40:05 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:40:05 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:40:05 - core.sources - INFO - Fetching Google News: House Rules Committee AND (CR OR spending)...
+2025-11-02 20:46:22 - ui.dashboard - INFO - Application started
+2025-11-02 20:46:22 - core.polymarket - INFO - Fetching positions for wallet 0x165Ab234...
+2025-11-02 20:46:22 - httpx - INFO - HTTP Request: GET https://gamma-api.polymarket.com/markets?wallet=0x165Ab23404f12a077c45426a36EDCE442347B477 "HTTP/1.1 200 OK"
+2025-11-02 20:46:22 - core.polymarket - INFO - Fetched 20 markets
+2025-11-02 20:46:22 - core.sources - INFO - Fetching Nitter search: Venezuela AND Pentagon...
+2025-11-02 20:46:22 - httpx - INFO - HTTP Request: GET https://nitter.net/search/rss?q=Venezuela+AND+Pentagon "HTTP/1.1 429 Too Many Requests"
+2025-11-02 20:46:22 - core.sources - WARNING - Rate limited nitter for 300s
+2025-11-02 20:46:22 - core.sources - INFO - Rotated to Nitter: https://nitter.it
+2025-11-02 20:46:22 - core.sources - INFO - Fetching Nitter search: Venezuela AND Pentagon...
+2025-11-02 20:46:23 - httpx - INFO - HTTP Request: GET https://nitter.it/search/rss?q=Venezuela+AND+Pentagon "HTTP/1.1 302 Found"
+2025-11-02 20:46:23 - httpx - INFO - HTTP Request: GET http://ww84.nitter.it/search/rss?q=Venezuela+AND+Pentagon "HTTP/1.1 200 OK"
+2025-11-02 20:46:23 - core.sources - INFO - Fetched 0 tweets for query
+2025-11-02 20:46:23 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:23 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:23 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:23 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:23 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:23 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:23 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:23 - core.sources - INFO - Fetching Google News: House Rules Committee AND (CR OR spending)...
+2025-11-02 20:46:23 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=House+Rules+Committee+AND+%28CR+OR+spending%29&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:46:23 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:46:23 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:23 - core.sources - INFO - Fetching Google News: Schumer AND (shutdown OR CR)...
+2025-11-02 20:46:24 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=Schumer+AND+%28shutdown+OR+CR%29&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:46:24 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:46:24 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:24 - core.sources - INFO - Fetching Google News: OMB OR CBO AND (score OR estimate)...
+2025-11-02 20:46:24 - httpx - INFO - HTTP Request: GET https://news.google.com/rss/search?q=OMB+OR+CBO+AND+%28score+OR+estimate%29&hl=en-US&gl=US&ceid=US%3Aen "HTTP/1.1 200 OK"
+2025-11-02 20:46:24 - core.sources - INFO - Fetched 5 news articles
+2025-11-02 20:46:24 - ui.dashboard - INFO - Data refresh complete: 20 markets
+2025-11-02 20:46:37 - core.polymarket - INFO - Using cached wallet positions (20 markets)
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:37 - ui.dashboard - INFO - Data refresh complete: 20 markets
+2025-11-02 20:46:52 - core.polymarket - INFO - Using cached wallet positions (20 markets)
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - core.sources - WARNING - Nitter rate limited, using cache
+2025-11-02 20:46:52 - ui.dashboard - INFO - Data refresh complete: 20 markets

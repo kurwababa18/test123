@@ -57,7 +57,22 @@ class Config:
     def cache_ttl_feeds(self) -> int:
         """Get cache TTL for feeds in seconds."""
         return self._data.get('cache_ttl_feeds', 1800)
-    
+
+    @property
+    def polymarket_api_key(self) -> str:
+        """Get Polymarket API key."""
+        return self._data.get('polymarket_api_key') or None
+
+    @property
+    def polymarket_api_secret(self) -> str:
+        """Get Polymarket API secret."""
+        return self._data.get('polymarket_api_secret') or None
+
+    @property
+    def polymarket_api_passphrase(self) -> str:
+        """Get Polymarket API passphrase."""
+        return self._data.get('polymarket_api_passphrase') or None
+
     @property
     def nitter_urls(self) -> List[str]:
         """Get list of Nitter instance URLs."""

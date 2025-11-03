@@ -68,37 +68,91 @@ class Config:
         ])
     
     @property
-    def topics(self) -> List[Dict[str, Any]]:
-        """Get list of topics/tabs configuration."""
-        return self._data.get('topics', [])
-    
-    def update_topic_title(self, key: str, new_title: str):
-        """Update a topic's display title."""
-        for topic in self._data.get('topics', []):
-            if topic.get('key') == key:
-                topic['title'] = new_title
+    def markets(self) -> List[Dict[str, Any]]:
+        """Get list of markets configuration."""
+        return self._data.get('markets', [])
+
+    def get_market_keywords(self, slug: str) -> List[str]:
+        """
+        Get keyword buckets for a specific market.
+
+        Args:
+            slug: Market slug identifier
+
+        Returns:
+            List of keywords for that market
+        """
+        for market in self.markets:
+            if market.get('slug') == slug:
+                return market.get('keywords', [])
+        return []
+
+    def update_market_keywords(self, slug: str, keywords: List[str]) -> bool:
+        """
+        Update keyword buckets for a market.
+
+        Args:
+            slug: Market slug identifier
+            keywords: New list of keywords
+
+        Returns:
+            True if updated, False if market not found
+        """
+        for market in self._data.get('markets', []):
+            if market.get('slug') == slug:
+                market['keywords'] = keywords
                 self.save()
                 return True
         return False
-    
-    def delete_topic(self, key: str) -> bool:
-        """Delete a topic by key."""
-        topics = self._data.get('topics', [])
-        original_len = len(topics)
-        self._data['topics'] = [t for t in topics if t.get('key') != key]
-        if len(self._data['topics']) < original_len:
-            self.save()
-            return True
-        return False
-    
-    def add_topic(self, key: str, title: str, keywords: List[str]):
-        """Add a new topic."""
-        topics = self._data.get('topics', [])
-        topics.append({
-            'key': key,
+
+    def add_market(self, slug: str, title: str, keywords: List[str]):
+        """
+        Add a new market with keyword buckets.
+
+        Args:
+            slug: Market slug identifier
+            title: Market title/question
+            keywords: Initial keywords for information aggregation
+        """
+        markets = self._data.get('markets', [])
+
+        # Don't add duplicates
+        if any(m.get('slug') == slug for m in markets):
+            return
+
+        markets.append({
+            'slug': slug,
             'title': title,
-            'markets': [],
             'keywords': keywords
         })
-        self._data['topics'] = topics
+        self._data['markets'] = markets
         self.save()
+
+    def sync_markets(self, position_data: List[Dict[str, Any]], keyword_extractor=None):
+        """
+        Sync markets from wallet positions.
+        Auto-generates keyword buckets if not already configured.
+
+        Args:
+            position_data: List of position dictionaries from API
+            keyword_extractor: Function to extract keywords from titles
+        """
+        existing_slugs = {m.get('slug') for m in self.markets}
+
+        for position in position_data:
+            slug = position.get('slug', '')
+            title = position.get('question', position.get('title', ''))
+
+            if not slug or not title:
+                continue
+
+            # Skip if already configured
+            if slug in existing_slugs:
+                continue
+
+            # Auto-generate keywords
+            keywords = []
+            if keyword_extractor and callable(keyword_extractor):
+                keywords = keyword_extractor(title)
+
+            self.add_market(slug, title, keywords)

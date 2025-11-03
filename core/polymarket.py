@@ -3,6 +3,7 @@ Polymarket API client for fetching market data.
 """
 
 import httpx
+import re
 from typing import List, Dict, Any, Optional
 from core.log import get_logger
 from core.cache import Cache
@@ -173,6 +174,54 @@ class PolymarketClient:
             'active': False
         }
     
+    def extract_keywords(self, title: str, min_word_length: int = 4) -> List[str]:
+        """
+        Extract keywords from market title for information aggregation.
+
+        Args:
+            title: Market title/question
+            min_word_length: Minimum word length to consider as keyword
+
+        Returns:
+            List of extracted keywords
+        """
+        # Remove common question words and punctuation
+        stop_words = {
+            'will', 'be', 'the', 'is', 'are', 'was', 'were', 'been', 'being',
+            'have', 'has', 'had', 'do', 'does', 'did', 'can', 'could', 'would',
+            'should', 'may', 'might', 'must', 'shall', 'a', 'an', 'and', 'or',
+            'but', 'if', 'of', 'at', 'by', 'for', 'with', 'about', 'as', 'to',
+            'from', 'in', 'on', 'that', 'this', 'what', 'when', 'where', 'who',
+            'why', 'how', 'there', 'than', 'than', 'before', 'after', 'above',
+            'below', 'between', 'through', 'during', 'before', 'after'
+        }
+
+        # Clean and split title
+        cleaned = re.sub(r'[^\w\s]', ' ', title.lower())
+        words = cleaned.split()
+
+        # Extract meaningful keywords
+        keywords = []
+        for word in words:
+            if len(word) >= min_word_length and word not in stop_words:
+                keywords.append(word.capitalize())
+
+        # Also extract quoted phrases (if any in original title)
+        quoted_phrases = re.findall(r'"([^"]+)"', title)
+        keywords.extend(quoted_phrases)
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_keywords = []
+        for k in keywords:
+            k_lower = k.lower()
+            if k_lower not in seen:
+                seen.add(k_lower)
+                unique_keywords.append(k)
+
+        logger.info(f"Extracted {len(unique_keywords)} keywords from: {title[:50]}")
+        return unique_keywords[:10]  # Limit to top 10
+
     def close(self):
         """Close the HTTP client."""
         self.client.close()

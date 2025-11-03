@@ -219,6 +219,9 @@ class PolymarketApp(App):
             if not positions:
                 logger.warning("No positions found")
                 status.status_text = "⚠️  No positions found - check wallet address in config.yaml"
+                # Show error in loading pane
+                loading_pane = self.query_one("#loading_pane", TabPane)
+                await loading_pane.mount(Label("[yellow]No positions found[/]\nCheck wallet address in config.yaml"))
                 return
 
             self.positions = positions
@@ -234,8 +237,9 @@ class PolymarketApp(App):
             # Rebuild tabs from positions
             tabs_container = self.query_one(TabbedContent)
 
-            # Clear loading pane
-            await tabs_container.remove_children()
+            # Remove loading pane
+            loading_pane = self.query_one("#loading_pane", TabPane)
+            await loading_pane.remove()
 
             # Create tab for each position
             for position in positions:
@@ -248,21 +252,19 @@ class PolymarketApp(App):
                 # Shorten title for tab
                 tab_title = title[:40] + "..." if len(title) > 40 else title
 
-                with tabs_container.compose():
-                    with TabPane(tab_title, id=f"tab_{slug}"):
-                        # Market context (minimal)
-                        market_label = Label(
-                            f"[bold cyan]Market:[/] {title}",
-                            classes="market_context"
-                        )
-                        yield market_label
-                        yield Rule()
+                # Create new tab pane
+                new_pane = TabPane(tab_title, id=f"tab_{slug}")
 
-                        # Keyword buckets with trend tracking
-                        yield KeywordBucketPanel(id=f"keywords_{slug}")
+                # Add widgets to the pane
+                await new_pane.mount(
+                    Label(f"[bold cyan]Market:[/] {title}", classes="market_context"),
+                    Rule(),
+                    KeywordBucketPanel(id=f"keywords_{slug}"),
+                    InformationPanel(id=f"info_{slug}")
+                )
 
-                        # Information aggregation panel
-                        yield InformationPanel(id=f"info_{slug}")
+                # Mount the pane to tabs container
+                await tabs_container.mount(new_pane)
 
             # Trigger first data refresh
             self.refresh_data()
@@ -270,9 +272,15 @@ class PolymarketApp(App):
             status.status_text = f"✅ Loaded {len(positions)} markets - aggregating information..."
 
         except Exception as e:
-            logger.error(f"Error initializing tabs: {e}")
+            logger.error(f"Error initializing tabs: {e}", exc_info=True)
             status = self.query_one("#status_bar", StatusBar)
             status.status_text = f"❌ Error: {str(e)[:50]}"
+            # Try to show error in UI
+            try:
+                loading_pane = self.query_one("#loading_pane", TabPane)
+                await loading_pane.mount(Label(f"[red]Error:[/] {str(e)}"))
+            except:
+                pass
 
     @work(exclusive=True, thread=True)
     async def refresh_data(self):

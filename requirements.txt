@@ -5,3 +5,4 @@ pyyaml>=6.0
 feedparser>=6.0.10
 python-dateutil>=2.8.2
 colorama>=0.4.6
+py-clob-client>=0.28.0

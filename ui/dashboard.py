@@ -166,66 +166,95 @@ class PolymarketApp(App):
     
     @work(exclusive=True)
     async def refresh_data(self):
-        """Refresh all data from sources."""
+        """Refresh all data from sources - fetches wallet positions and updates UI."""
         try:
             status = self.query_one("#status_bar", StatusBar)
-            status.status_text = "🔄 Fetching data..."
-            
-            # Fetch markets
-            markets = await asyncio.to_thread(
+            status.status_text = "🔄 Fetching your positions..."
+
+            # Fetch wallet positions
+            positions = await asyncio.to_thread(
                 self.polymarket.get_wallet_positions,
                 self.config.wallet_address
             )
-            
+
+            if not positions:
+                # No positions found - use config topics as fallback
+                logger.warning("No positions found, using config topics")
+                status.status_text = "⚠️  No positions found - using default topics"
+                # Fall back to config topics
+                self.topics = self.config.topics
+            else:
+                # Generate dynamic topics from user's positions
+                dynamic_topics = await asyncio.to_thread(
+                    self.polymarket.generate_topics_from_positions,
+                    positions
+                )
+
+                if dynamic_topics:
+                    self.topics = dynamic_topics
+                    logger.info(f"Using {len(dynamic_topics)} dynamic topics from positions")
+
             # Update each topic
             for topic in self.topics:
                 topic_key = topic['key']
-                
-                # Update markets table
-                table = self.query_one(f"#table_{topic_key}", DataTable)
-                table.clear()
-                
-                # Show all markets or filter by keywords
-                display_markets = markets[:10]  # Show top 10 by volume
-                
-                for market in display_markets:
-                    parsed = self.polymarket.parse_market_data(market)
-                    
-                    title = parsed['title'][:50]
-                    yes_price = f"{parsed['yes_price']:.1f}¢"
-                    no_price = f"{parsed['no_price']:.1f}¢"
-                    volume = f"${parsed['volume_24h']/1000:.1f}K"
-                    end_date = parsed['end_date'][:10] if parsed['end_date'] != 'N/A' else 'N/A'
-                    
-                    table.add_row(title, yes_price, no_price, volume, end_date)
-                
-                self.markets_data[topic_key] = display_markets
-                
-                # Update feeds
+
+                # Update markets table - show the market(s) for this topic
+                try:
+                    table = self.query_one(f"#table_{topic_key}", DataTable)
+                    table.clear()
+
+                    display_markets = topic.get('markets', [])
+
+                    for market_data in display_markets:
+                        parsed = market_data if isinstance(market_data, dict) and 'title' in market_data else self.polymarket.parse_market_data(market_data)
+
+                        title = parsed['title'][:50]
+                        yes_price = f"{parsed['yes_price']:.1f}¢"
+                        no_price = f"{parsed['no_price']:.1f}¢"
+
+                        # Show position info if available
+                        if 'position' in parsed:
+                            pos = parsed['position']
+                            pnl = f"P/L: ${pos['cash_pnl']:.2f}"
+                            side = f"({pos['side']})"
+                            table.add_row(f"{title} {side}", yes_price, no_price, pnl, parsed['end_date'][:10] if parsed['end_date'] != 'N/A' else 'N/A')
+                        else:
+                            volume = f"${parsed['volume_24h']/1000:.1f}K"
+                            table.add_row(title, yes_price, no_price, volume, parsed['end_date'][:10] if parsed['end_date'] != 'N/A' else 'N/A')
+
+                    self.markets_data[topic_key] = display_markets
+                except Exception as e:
+                    logger.warning(f"Could not update table for topic {topic_key}: {e}")
+
+                # Update feeds with keywords from this topic
                 keywords = topic.get('keywords', [])
                 if keywords:
-                    feed_items = await asyncio.to_thread(
-                        self.feeds.aggregate_feeds,
-                        keywords
-                    )
-                    
-                    feed_panel = self.query_one(f"#feeds_{topic_key}", FeedPanel)
-                    feed_panel.feeds = feed_items
-                    self.feeds_data[topic_key] = feed_items
-            
+                    try:
+                        feed_items = await asyncio.to_thread(
+                            self.feeds.aggregate_feeds,
+                            keywords
+                        )
+
+                        feed_panel = self.query_one(f"#feeds_{topic_key}", FeedPanel)
+                        feed_panel.feeds = feed_items
+                        self.feeds_data[topic_key] = feed_items
+                    except Exception as e:
+                        logger.warning(f"Could not update feeds for topic {topic_key}: {e}")
+
             # Update status
             self.last_update = datetime.now()
-            market_count = len(markets)
+            position_count = len(positions) if positions else 0
             status.status_text = (
                 f"✅ Updated {self.last_update.strftime('%H:%M:%S')} | "
-                f"{market_count} markets | "
+                f"{position_count} positions | "
                 f"Next: {self.config.refresh_seconds}s"
             )
-            
-            logger.info(f"Data refresh complete: {market_count} markets")
-            
+
+            logger.info(f"Data refresh complete: {position_count} positions")
+
         except Exception as e:
             logger.error(f"Error refreshing data: {e}")
+            logger.exception(e)
             status = self.query_one("#status_bar", StatusBar)
             status.status_text = f"❌ Error: {str(e)[:50]}"
     

@@ -1,7 +1,8 @@
 """
-Polymarket API client for fetching market data using Gamma API.
+Polymarket API client for fetching market data using Data API and Gamma API.
 """
 
+import re
 import httpx
 from typing import List, Dict, Any, Optional
 from core.log import get_logger
@@ -10,9 +11,10 @@ from core.cache import Cache
 logger = get_logger(__name__)
 
 class PolymarketClient:
-    """Client for Polymarket Gamma API."""
+    """Client for Polymarket Data API."""
 
     GAMMA_MARKETS_URL = "https://gamma-api.polymarket.com/markets"
+    DATA_API_POSITIONS_URL = "https://data-api.polymarket.com/positions"
 
     def __init__(self, cache: Cache, api_key: Optional[str] = None, api_secret: Optional[str] = None, api_passphrase: Optional[str] = None):
         """
@@ -105,19 +107,74 @@ class PolymarketClient:
 
     def get_wallet_positions(self, wallet_address: str) -> List[Dict[str, Any]]:
         """
-        Fetch open positions for a wallet.
-
-        Note: The Gamma API doesn't support wallet-specific filtering.
-        Returns general market data instead.
+        Fetch open positions for a wallet using Data API.
 
         Args:
-            wallet_address: Ethereum wallet address (not used)
+            wallet_address: Ethereum wallet address
 
         Returns:
-            List of market data dictionaries
+            List of position data dictionaries with market information
         """
-        logger.info("Wallet-specific positions not available via Gamma API. Returning general markets.")
-        return self.get_markets(limit=100)
+        cache_key = f"wallet_positions_{wallet_address}"
+
+        # Try cache first
+        cached = self.cache.get(cache_key, ttl=120)  # 2 min TTL
+        if cached is not None:
+            logger.info(f"Using cached wallet positions ({len(cached)} positions)")
+            return cached
+
+        try:
+            logger.info(f"Fetching positions for wallet {wallet_address[:10]}... from Data API")
+
+            # Prepare query parameters
+            params = {
+                "user": wallet_address,
+                "limit": 100,
+                "sortBy": "CASHPNL",  # Sort by cash P&L
+                "sortDirection": "DESC"
+            }
+
+            # Make the request with headers
+            headers = {
+                "User-Agent": "Mozilla/5.0 (compatible; PolymarketTerminal/1.0)"
+            }
+            response = self.client.get(self.DATA_API_POSITIONS_URL, params=params, headers=headers)
+            response.raise_for_status()
+
+            # Parse the response
+            data = response.json()
+            positions = []
+
+            # Handle different response formats
+            if isinstance(data, list):
+                positions = data
+            elif isinstance(data, dict):
+                # Try common keys
+                if 'data' in data:
+                    positions = data['data']
+                elif 'positions' in data:
+                    positions = data['positions']
+                else:
+                    logger.warning(f"Unexpected response format: {list(data.keys())}")
+                    positions = []
+
+            logger.info(f"Fetched {len(positions)} positions for wallet {wallet_address[:10]}...")
+
+            # Cache the result
+            self.cache.set(cache_key, positions)
+
+            return positions
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error fetching wallet positions: {e.response.status_code} - {e.response.text[:200]}")
+            return []
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching wallet positions: {e}")
+            return []
+        except Exception as e:
+            logger.error(f"Error fetching wallet positions: {e}")
+            logger.exception(e)
+            return []
 
     def get_market_by_slug(self, slug: str) -> Optional[Dict[str, Any]]:
         """
@@ -161,27 +218,45 @@ class PolymarketClient:
             logger.error(f"Error fetching market {slug}: {e}")
             return None
 
-    def parse_market_data(self, market: Dict[str, Any]) -> Dict[str, Any]:
+    def parse_market_data(self, market_or_position: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Parse market data into standardized format.
+        Parse market or position data into standardized format.
 
         Args:
-            market: Raw market data from Gamma API
+            market_or_position: Raw market/position data from API
 
         Returns:
-            Parsed market data with keys: title, yes_price, no_price, volume_24h, end_date
+            Parsed market data with keys: title, yes_price, no_price, volume_24h, end_date, position_info
         """
         try:
             # Handle both dict and string responses
-            if isinstance(market, str):
-                logger.warning(f"Market data is string, skipping: {market[:100]}")
+            if isinstance(market_or_position, str):
+                logger.warning(f"Market data is string, skipping: {market_or_position[:100]}")
                 return self._get_empty_market()
 
-            if not isinstance(market, dict):
-                logger.warning(f"Market data is not dict, skipping: {type(market)}")
+            if not isinstance(market_or_position, dict):
+                logger.warning(f"Market data is not dict, skipping: {type(market_or_position)}")
                 return self._get_empty_market()
 
-            # Extract title/question - Gamma API uses 'question' field
+            # Check if this is a position (has 'market' nested inside) or a market directly
+            if 'market' in market_or_position:
+                # This is a position from Data API
+                market = market_or_position.get('market', {})
+                position_info = {
+                    'size': market_or_position.get('size', 0),
+                    'initial_value': market_or_position.get('initialValue', 0),
+                    'current_value': market_or_position.get('currentValue', 0),
+                    'cash_pnl': market_or_position.get('cashPnl', 0),
+                    'percent_pnl': market_or_position.get('percentPnl', 0),
+                    'outcome': market_or_position.get('outcome', ''),
+                    'side': market_or_position.get('side', '')  # YES or NO
+                }
+            else:
+                # This is a direct market object
+                market = market_or_position
+                position_info = None
+
+            # Extract title/question - Data API includes both formats
             title = (
                 market.get('question') or
                 market.get('title') or
@@ -280,7 +355,7 @@ class PolymarketClient:
             if 'closed' in market:
                 active = not market.get('closed', False)
 
-            return {
+            result = {
                 'title': title,
                 'yes_price': yes_price,
                 'no_price': no_price,
@@ -289,6 +364,12 @@ class PolymarketClient:
                 'slug': slug,
                 'active': active
             }
+
+            # Add position info if available
+            if position_info:
+                result['position'] = position_info
+
+            return result
 
         except Exception as e:
             logger.error(f"Error parsing market data: {e}")
@@ -306,6 +387,101 @@ class PolymarketClient:
             'slug': '',
             'active': False
         }
+
+    def extract_keywords_from_market(self, market_title: str) -> List[str]:
+        """
+        Extract relevant keywords from a market title for news searching.
+
+        Args:
+            market_title: The market question/title
+
+        Returns:
+            List of keyword strings suitable for news searches
+        """
+        # Remove common question words and phrases
+        stop_words = {
+            'will', 'be', 'the', 'a', 'an', 'is', 'are', 'was', 'were',
+            'have', 'has', 'had', 'do', 'does', 'did', 'can', 'could',
+            'would', 'should', 'may', 'might', 'must', 'shall',
+            'by', 'before', 'after', 'on', 'in', 'at', 'to', 'for',
+            'of', 'with', 'from', 'as', 'into', 'through', 'during',
+            'or', 'and', 'but', 'if', 'than', 'more', 'less', 'this',
+            'that', 'these', 'those', 'end', 'year'
+        }
+
+        # Extract potential entities and phrases
+        keywords = []
+
+        # Remove date ranges and years in specific formats
+        title = re.sub(r'\b20\d{2}\b', '', market_title)  # Remove years
+        title = re.sub(r'\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}\b', '', title, flags=re.IGNORECASE)
+
+        # Extract quoted phrases
+        quoted = re.findall(r'"([^"]+)"', title)
+        keywords.extend(quoted)
+
+        # Extract capitalized phrases (likely proper nouns)
+        # Match sequences of capitalized words
+        proper_nouns = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', market_title)
+        keywords.extend(proper_nouns)
+
+        # Split into words and filter
+        words = re.findall(r'\b[A-Za-z]+\b', title.lower())
+        significant_words = [w for w in words if len(w) > 3 and w not in stop_words]
+
+        # Take top significant words
+        keywords.extend(significant_words[:5])
+
+        # Deduplicate while preserving order
+        seen = set()
+        unique_keywords = []
+        for kw in keywords:
+            kw_lower = kw.lower()
+            if kw_lower not in seen and kw_lower not in stop_words:
+                seen.add(kw_lower)
+                unique_keywords.append(kw)
+
+        return unique_keywords[:8]  # Return top 8 keywords
+
+    def generate_topics_from_positions(self, positions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Generate topic configuration from user's positions for news aggregation.
+
+        Args:
+            positions: List of position dictionaries from get_wallet_positions
+
+        Returns:
+            List of topic dictionaries with keys: key, title, markets, keywords
+        """
+        topics = []
+
+        for i, position in enumerate(positions[:10], 1):  # Limit to top 10 positions
+            parsed = self.parse_market_data(position)
+            title = parsed['title']
+
+            # Extract keywords for this market
+            keywords = self.extract_keywords_from_market(title)
+
+            if not keywords:
+                continue
+
+            # Create a short key from the title
+            key = re.sub(r'[^a-z0-9]+', '_', title[:50].lower()).strip('_')
+
+            # Shorten title for display
+            display_title = title[:40] + '...' if len(title) > 40 else title
+
+            topic = {
+                'key': f"position_{i}_{key}",
+                'title': display_title,
+                'markets': [parsed],
+                'keywords': keywords[:5]  # Top 5 keywords for news search
+            }
+
+            topics.append(topic)
+
+        logger.info(f"Generated {len(topics)} topics from {len(positions)} positions")
+        return topics
 
     def close(self):
         """Close the HTTP client."""

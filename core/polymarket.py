@@ -443,12 +443,13 @@ class PolymarketClient:
 
         return unique_keywords[:8]  # Return top 8 keywords
 
-    def generate_topics_from_positions(self, positions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def generate_topics_from_positions(self, positions: List[Dict[str, Any]], config=None) -> List[Dict[str, Any]]:
         """
         Generate topic configuration from user's positions for news aggregation.
 
         Args:
             positions: List of position dictionaries from get_wallet_positions
+            config: Optional Config object to load custom keyword buckets
 
         Returns:
             List of topic dictionaries with keys: key, title, markets, keywords
@@ -458,15 +459,27 @@ class PolymarketClient:
         for i, position in enumerate(positions[:10], 1):  # Limit to top 10 positions
             parsed = self.parse_market_data(position)
             title = parsed['title']
-
-            # Extract keywords for this market
-            keywords = self.extract_keywords_from_market(title)
-
-            if not keywords:
-                continue
+            slug = parsed.get('slug', '')
 
             # Create a short key from the title
             key = re.sub(r'[^a-z0-9]+', '_', title[:50].lower()).strip('_')
+
+            # Check for custom keyword bucket first
+            if config and slug:
+                custom_keywords = config.get_custom_keyword_bucket(slug)
+                if custom_keywords:
+                    logger.info(f"Using custom keyword bucket for {title[:30]}")
+                    keywords = custom_keywords
+                else:
+                    # Auto-generate keywords
+                    keywords = self.extract_keywords_from_market(title)
+            else:
+                # Auto-generate keywords
+                keywords = self.extract_keywords_from_market(title)
+
+            if not keywords:
+                # Use title itself as fallback
+                keywords = [title[:30]]
 
             # Shorten title for display
             display_title = title[:40] + '...' if len(title) > 40 else title
@@ -474,8 +487,10 @@ class PolymarketClient:
             topic = {
                 'key': f"position_{i}_{key}",
                 'title': display_title,
+                'full_title': title,  # Keep full title for editor
+                'slug': slug,  # Keep slug for bucket management
                 'markets': [parsed],
-                'keywords': keywords[:5]  # Top 5 keywords for news search
+                'keywords': keywords[:8]  # Up to 8 keywords for search
             }
 
             topics.append(topic)

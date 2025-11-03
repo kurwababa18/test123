@@ -117,3 +117,57 @@ class Config:
         })
         self._data['topics'] = topics
         self.save()
+
+    def get_custom_keyword_bucket(self, market_key: str) -> List[str]:
+        """
+        Get custom keyword bucket for a market.
+
+        Args:
+            market_key: Market identifier/slug
+
+        Returns:
+            List of custom keywords, or empty list if none defined
+        """
+        buckets = self._data.get('custom_keyword_buckets', {})
+        if not isinstance(buckets, dict):
+            return []
+
+        market_bucket = buckets.get(market_key, {})
+        if isinstance(market_bucket, dict):
+            return market_bucket.get('keywords', [])
+        return []
+
+    def set_custom_keyword_bucket(self, market_key: str, keywords: List[str]):
+        """
+        Set custom keyword bucket for a market.
+
+        Args:
+            market_key: Market identifier/slug
+            keywords: List of keyword strings
+        """
+        if 'custom_keyword_buckets' not in self._data:
+            self._data['custom_keyword_buckets'] = {}
+
+        buckets = self._data['custom_keyword_buckets']
+        if not isinstance(buckets, dict):
+            buckets = {}
+            self._data['custom_keyword_buckets'] = buckets
+
+        # Store keywords
+        buckets[market_key] = {
+            'keywords': keywords
+        }
+
+        self.save()
+
+    def delete_custom_keyword_bucket(self, market_key: str):
+        """
+        Delete custom keyword bucket for a market.
+
+        Args:
+            market_key: Market identifier/slug
+        """
+        buckets = self._data.get('custom_keyword_buckets', {})
+        if isinstance(buckets, dict) and market_key in buckets:
+            del buckets[market_key]
+            self.save()

@@ -19,6 +19,7 @@ from core.cache import Cache
 from core.polymarket import PolymarketClient
 from core.sources import FeedSource
 from core.log import get_logger
+from ui.keyword_editor import KeywordEditorScreen
 
 logger = get_logger(__name__)
 
@@ -184,10 +185,11 @@ class PolymarketApp(App):
                 # Fall back to config topics
                 self.topics = self.config.topics
             else:
-                # Generate dynamic topics from user's positions
+                # Generate dynamic topics from user's positions (with custom buckets)
                 dynamic_topics = await asyncio.to_thread(
                     self.polymarket.generate_topics_from_positions,
-                    positions
+                    positions,
+                    self.config  # Pass config to check custom buckets
                 )
 
                 if dynamic_topics:
@@ -283,7 +285,57 @@ class PolymarketApp(App):
     def action_refresh(self) -> None:
         """Manually trigger refresh."""
         self.refresh_data()
-    
+
+    def action_edit_tab(self) -> None:
+        """Open keyword editor for current tab."""
+        try:
+            tabs = self.query_one(TabbedContent)
+            current_tab_id = tabs.active
+
+            # Find the topic for this tab
+            current_topic = None
+            for topic in self.topics:
+                if topic['key'] == current_tab_id.replace("tab-", ""):
+                    current_topic = topic
+                    break
+
+            if not current_topic:
+                logger.warning(f"Could not find topic for tab {current_tab_id}")
+                return
+
+            # Get current keywords
+            keywords = current_topic.get('keywords', [])
+            title = current_topic.get('full_title', current_topic.get('title', 'Unknown'))
+            slug = current_topic.get('slug', '')
+
+            # Define save callback
+            def on_save_keywords(new_keywords: List[str]):
+                """Save edited keywords to config and update topic."""
+                if slug:
+                    # Save to config
+                    self.config.set_custom_keyword_bucket(slug, new_keywords)
+                    logger.info(f"Saved custom keyword bucket for {title[:30]}")
+
+                    # Update current topic
+                    current_topic['keywords'] = new_keywords
+
+                    # Show confirmation
+                    status = self.query_one("#status_bar", StatusBar)
+                    status.status_text = f"✅ Keywords updated! Refreshing..."
+
+                    # Refresh data to apply changes
+                    self.refresh_data()
+                else:
+                    logger.warning("No slug available for saving custom bucket")
+
+            # Open editor modal
+            self.push_screen(
+                KeywordEditorScreen(title, keywords, on_save_keywords)
+            )
+
+        except Exception as e:
+            logger.error(f"Error opening keyword editor: {e}")
+
     def action_increase_refresh(self) -> None:
         """Decrease refresh interval (faster)."""
         current = self.config.refresh_seconds

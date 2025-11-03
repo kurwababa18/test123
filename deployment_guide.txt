@@ -1,0 +1,303 @@
+========================================
+  POLYMARKET TERMINAL
+  DEPLOYMENT GUIDE
+========================================
+
+INSTALLATION LOCATION
+---------------------
+C:\Users\turner\Downloads\claude111\
+
+This is your complete install directory.
+Everything runs from here - no global installs needed!
+
+
+STEP-BY-STEP SETUP
+------------------
+
+Step 1: CREATE THE FOLDER
+--------------------------
+Open Command Prompt or File Explorer:
+
+  cd C:\Users\turner\Downloads
+  mkdir claude111
+  cd claude111
+
+Or simply create the folder in Windows Explorer.
+
+
+Step 2: COPY ALL FILES
+----------------------
+Copy these files from Claude's artifacts:
+
+ROOT DIRECTORY (C:\Users\turner\Downloads\claude111\):
+  ✓ app.py
+  ✓ requirements.txt
+  ✓ run.bat
+  ✓ README.txt
+  ✓ QUICK_SETUP.bat (optional helper)
+
+CORE FOLDER (C:\Users\turner\Downloads\claude111\core\):
+  ✓ __init__.py (empty file - just create it)
+  ✓ config.py
+  ✓ polymarket.py
+  ✓ sources.py
+  ✓ cache.py
+  ✓ log.py
+
+UI FOLDER (C:\Users\turner\Downloads\claude111\ui\):
+  ✓ __init__.py (empty file - just create it)
+  ✓ dashboard.py
+
+
+Step 3: CREATE EMPTY __init__.py FILES
+--------------------------------------
+These are required for Python to recognize the folders as modules.
+
+Option A - Command Prompt:
+  cd C:\Users\turner\Downloads\claude111
+  type nul > core\__init__.py
+  type nul > ui\__init__.py
+
+Option B - File Explorer:
+  Right-click in core\ folder
+  New > Text Document
+  Rename to __init__.py (remove .txt extension)
+  Repeat for ui\ folder
+
+Option C - Run QUICK_SETUP.bat:
+  Double-click QUICK_SETUP.bat
+  It creates everything automatically
+
+
+Step 4: RUN THE APPLICATION
+---------------------------
+Simply double-click: run.bat
+
+First run will:
+  1. Create virtual environment (venv\)
+  2. Install all dependencies automatically
+  3. Create config.yaml with defaults
+  4. Create cache\ and logs\ folders
+  5. Launch the terminal UI
+
+This takes 1-2 minutes on first run.
+Subsequent runs start immediately!
+
+
+VERIFICATION CHECKLIST
+----------------------
+
+Your folder should look like this:
+
+claude111\
+├── app.py                    ✓
+├── requirements.txt          ✓
+├── run.bat                   ✓
+├── README.txt                ✓
+├── config.yaml              (auto-created)
+├── QUICK_SETUP.bat          (optional)
+│
+├── core\
+│   ├── __init__.py          ✓ CRITICAL!
+│   ├── config.py            ✓
+│   ├── polymarket.py        ✓
+│   ├── sources.py           ✓
+│   ├── cache.py             ✓
+│   └── log.py               ✓
+│
+├── ui\
+│   ├── __init__.py          ✓ CRITICAL!
+│   └── dashboard.py         ✓
+│
+├── cache\                   (auto-created)
+├── logs\                    (auto-created)
+└── venv\                    (auto-created)
+
+
+COMMON ISSUES & SOLUTIONS
+-------------------------
+
+Issue: "Python not found"
+Solution:
+  - Install Python 3.10+ from python.org
+  - During install, check "Add Python to PATH"
+  - Restart command prompt after installing
+
+Issue: "Module not found" errors
+Solution:
+  - Make sure __init__.py files exist in core\ and ui\
+  - Both files can be empty, but MUST be present
+  - Check spelling is exactly: __init__.py (two underscores)
+
+Issue: run.bat doesn't start
+Solution:
+  - Right-click run.bat > Edit
+  - Verify it contains the batch script code
+  - Try running from command prompt to see errors:
+    cd C:\Users\turner\Downloads\claude111
+    run.bat
+
+Issue: Dependencies won't install
+Solution:
+  - Delete venv\ folder completely
+  - Run run.bat again
+  - Or install manually:
+    python -m venv venv
+    venv\Scripts\activate
+    pip install -r requirements.txt
+
+Issue: No data appearing
+Solution:
+  - Wait 30 seconds for initial cache
+  - Check logs\polyterm.log for errors
+  - Press 'R' to force refresh
+  - Check internet connection
+
+
+TESTING YOUR INSTALLATION
+--------------------------
+
+1. Open Command Prompt
+2. Navigate to install folder:
+   cd C:\Users\turner\Downloads\claude111
+
+3. Validate configuration:
+   python app.py --check
+
+   Should show:
+   ✅ Configuration valid!
+      Wallet: 0x165Ab23404f12a077c45426a36EDCE442347B477
+      Refresh: 15s
+      Topics: 2
+        - US–Venezuela (6 keywords)
+        - Government Shutdown (5 keywords)
+
+4. If that works, run the app:
+   Double-click run.bat
+
+
+CUSTOMIZATION
+-------------
+
+After first successful run, edit config.yaml to:
+
+• Change wallet address:
+  wallet_address: "0xYOUR_WALLET_HERE"
+
+• Adjust refresh rate:
+  refresh_seconds: 20  # Update every 20 seconds
+
+• Add custom topics:
+  topics:
+    - key: "my_topic"
+      title: "My Market"
+      markets: []
+      keywords:
+        - "search term one"
+        - "another search"
+
+
+KEYBOARD CONTROLS (WHEN RUNNING)
+---------------------------------
+
+←/→   Switch between tabs
+R     Refresh data now
++     Faster refresh (decrease interval)
+-     Slower refresh (increase interval)
+/     Search (shows navigation help)
+E     Edit reminder (opens config note)
+Q     Quit application
+
+
+FILE LOCATIONS
+--------------
+
+Configuration:  config.yaml
+Logs:           logs\polyterm.log
+Cache:          cache\*.json
+Python Env:     venv\
+
+
+UNINSTALL
+---------
+
+Simply delete the entire folder:
+  C:\Users\turner\Downloads\claude111\
+
+No registry entries, no global changes!
+
+
+BACKUP YOUR CONFIG
+------------------
+
+To backup your customizations:
+  - Copy config.yaml to safe location
+  - After reinstall, restore config.yaml
+  - All your topics and settings return
+
+
+SUPPORT RESOURCES
+-----------------
+
+1. Check logs\polyterm.log for detailed errors
+2. Run: python app.py --check
+3. Review README.txt for features
+4. Verify Python 3.10+ installed: python --version
+
+
+WHAT THIS APP DOES
+------------------
+
+✓ Monitors your Polymarket wallet positions
+✓ Fetches live market prices (YES/NO)
+✓ Shows 24-hour volume and end dates
+✓ Searches Twitter/X via Nitter (privacy-friendly)
+✓ Aggregates Google News
+✓ Organizes everything into custom topic tabs
+✓ Caches data to minimize API calls
+✓ Auto-handles rate limits
+✓ Provides dark-themed terminal interface
+
+
+TECHNICAL NOTES
+---------------
+
+• Uses Polymarket Gamma API (public, no auth)
+• Uses Nitter RSS (no Twitter API key needed)
+• All data cached locally for 2-30 minutes
+• Automatic retry with exponential backoff
+• Log rotation: 3 files × 2MB each
+• Python 3.10+ required
+• Works offline using cached data
+
+
+SECURITY NOTES
+--------------
+
+✅ READ-ONLY wallet monitoring
+✅ No private keys required
+✅ No data sent to third parties
+✅ All processing happens locally
+✅ Cache stored on your machine only
+
+⚠️ The wallet address in config.yaml is PUBLIC
+⚠️ Anyone can view public blockchain data
+⚠️ This app cannot make transactions
+
+
+FINAL CHECKLIST
+---------------
+
+Before running:
+□ Python 3.10+ installed
+□ All files copied to claude111\
+□ __init__.py exists in core\ and ui\
+□ run.bat is executable
+□ Internet connection available
+
+Ready? Double-click run.bat! 🚀
+
+
+========================================
+Questions? Check logs\polyterm.log first
+========================================

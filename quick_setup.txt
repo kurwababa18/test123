@@ -1,0 +1,99 @@
+@echo off
+REM Quick Setup Script for Polymarket Terminal
+REM Run this once to create the folder structure
+
+echo ========================================
+echo   POLYMARKET TERMINAL - QUICK SETUP
+echo ========================================
+echo.
+
+cd /d "%~dp0"
+
+echo [1/4] Creating directory structure...
+if not exist core mkdir core
+if not exist ui mkdir ui
+if not exist cache mkdir cache
+if not exist logs mkdir logs
+
+echo [2/4] Creating __init__.py files...
+type nul > core\__init__.py
+type nul > ui\__init__.py
+
+echo [3/4] Checking for required files...
+set MISSING=0
+
+if not exist app.py (
+    echo   [!] Missing: app.py
+    set MISSING=1
+)
+if not exist requirements.txt (
+    echo   [!] Missing: requirements.txt
+    set MISSING=1
+)
+if not exist run.bat (
+    echo   [!] Missing: run.bat
+    set MISSING=1
+)
+if not exist core\config.py (
+    echo   [!] Missing: core\config.py
+    set MISSING=1
+)
+if not exist core\polymarket.py (
+    echo   [!] Missing: core\polymarket.py
+    set MISSING=1
+)
+if not exist core\sources.py (
+    echo   [!] Missing: core\sources.py
+    set MISSING=1
+)
+if not exist core\cache.py (
+    echo   [!] Missing: core\cache.py
+    set MISSING=1
+)
+if not exist core\log.py (
+    echo   [!] Missing: core\log.py
+    set MISSING=1
+)
+if not exist ui\dashboard.py (
+    echo   [!] Missing: ui\dashboard.py
+    set MISSING=1
+)
+
+if %MISSING%==1 (
+    echo.
+    echo [ERROR] Some files are missing. Please copy all Python files first.
+    echo.
+    pause
+    exit /b 1
+)
+
+echo   [OK] All required files present!
+
+echo [4/4] Checking Python installation...
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo   [!] Python not found in PATH
+    echo   Please install Python 3.10+ from python.org
+    echo.
+    pause
+    exit /b 1
+)
+
+python --version
+echo   [OK] Python is installed!
+
+echo.
+echo ========================================
+echo   SETUP COMPLETE!
+echo ========================================
+echo.
+echo Current location: %CD%
+echo.
+echo Next steps:
+echo   1. Double-click run.bat to start the app
+echo   2. First run will auto-install dependencies
+echo   3. Edit config.yaml to customize topics
+echo.
+echo Ready to go! 🚀
+echo.
+pause

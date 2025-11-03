@@ -1,0 +1,93 @@
+========================================
+  POLYMARKET TERMINAL
+  FILE CHECKLIST
+========================================
+
+Installation Path:
+C:\Users\turner\Downloads\claude111\
+
+Check off each file as you create it:
+
+
+ROOT DIRECTORY FILES
+--------------------
+□ app.py
+□ requirements.txt
+□ run.bat
+□ README.txt
+□ QUICK_SETUP.bat (optional)
+
+
+CORE FOLDER (core\)
+-------------------
+□ core\__init__.py          ← Must be EMPTY file
+□ core\config.py
+□ core\polymarket.py
+□ core\sources.py
+□ core\cache.py
+□ core\log.py
+
+
+UI FOLDER (ui\)
+---------------
+□ ui\__init__.py            ← Must be EMPTY file
+□ ui\dashboard.py
+
+
+AUTO-CREATED (Don't create these)
+----------------------------------
+○ config.yaml               (created on first run)
+○ cache\                    (created automatically)
+○ logs\                     (created automatically)
+○ venv\                     (created automatically)
+
+
+CRITICAL: __init__.py FILES
+---------------------------
+These two files are REQUIRED but EMPTY:
+
+□ core\__init__.py
+□ ui\__init__.py
+
+To create them:
+  Method 1: type nul > core\__init__.py
+  Method 2: Create blank text file, rename to __init__.py
+  Method 3: Run QUICK_SETUP.bat
+
+
+QUICK VERIFICATION
+------------------
+
+Open Command Prompt:
+  cd C:\Users\turner\Downloads\claude111
+  dir
+
+You should see:
+  app.py
+  requirements.txt
+  run.bat
+  README.txt
+  core <DIR>
+  ui <DIR>
+
+Then check:
+  dir core
+  dir ui
+
+Should see __init__.py in each!
+
+
+READY TO RUN?
+-------------
+
+✓ All files copied
+✓ __init__.py files created
+✓ Python 3.10+ installed
+
+Double-click: run.bat
+
+First run takes 1-2 minutes to setup.
+Enjoy! 🚀
+
+
+========================================

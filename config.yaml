@@ -1,0 +1,36 @@
+# Polymarket Terminal Configuration
+
+wallet_address: "0x165Ab23404f12a077c45426a36EDCE442347B477"
+refresh_seconds: 15
+cache_limit: 200
+cache_ttl_markets: 120  # 2 minutes
+cache_ttl_feeds: 1800   # 30 minutes
+
+nitter:
+  base_urls:
+    - "https://nitter.net"
+    - "https://nitter.it"
+    - "https://nitter.poast.org"
+  fallback_on_error: true
+
+topics:
+  - key: "venezuela_conflict"
+    title: "US–Venezuela"
+    markets: []
+    keywords:
+      - "Venezuela AND Pentagon"
+      - "Venezuela AND Southern Command"
+      - "Trump AND Maduro"
+      - "Nicolás Maduro OR Maduro"
+      - "Caracas AND (troops OR military OR strike)"
+      - "Venezuela AND (incursion OR border OR use of force)"
+  
+  - key: "gov_shutdown"
+    title: "Government Shutdown"
+    markets: []
+    keywords:
+      - "government shutdown"
+      - "continuing resolution OR CR vote"
+      - "House Rules Committee AND (CR OR spending)"
+      - "Schumer AND (shutdown OR CR)"
+      - "OMB OR CBO AND (score OR estimate)"

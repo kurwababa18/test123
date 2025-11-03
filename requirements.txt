@@ -1,0 +1,7 @@
+textual>=0.40.0
+rich>=13.0.0
+httpx>=0.25.0
+pyyaml>=6.0
+feedparser>=6.0.10
+python-dateutil>=2.8.2
+colorama>=0.4.6

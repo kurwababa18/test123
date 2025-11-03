@@ -13,24 +13,16 @@ nitter:
     - "https://nitter.poast.org"
   fallback_on_error: true
 
-topics:
-  - key: "venezuela_conflict"
-    title: "US–Venezuela"
-    markets: []
-    keywords:
-      - "Venezuela AND Pentagon"
-      - "Venezuela AND Southern Command"
-      - "Trump AND Maduro"
-      - "Nicolás Maduro OR Maduro"
-      - "Caracas AND (troops OR military OR strike)"
-      - "Venezuela AND (incursion OR border OR use of force)"
-  
-  - key: "gov_shutdown"
-    title: "Government Shutdown"
-    markets: []
-    keywords:
-      - "government shutdown"
-      - "continuing resolution OR CR vote"
-      - "House Rules Committee AND (CR OR spending)"
-      - "Schumer AND (shutdown OR CR)"
-      - "OMB OR CBO AND (score OR estimate)"
+# Keyword buckets per market
+# Auto-generated from wallet positions, fully customizable
+# Add/edit keywords to refine information aggregation for each market
+markets:
+  # Example structure (will auto-populate from your wallet):
+  # - slug: "will-trump-win-2024-election"
+  #   title: "Will Trump win 2024 election?"
+  #   keywords:
+  #     - "Trump AND election"
+  #     - "Trump rally"
+  #     - "swing states"
+  #     - "electoral college"
+  #     - "Trump AND polls"
